@@ -28,6 +28,18 @@ const routes = {
   },
   '/articles/:id/downvote': {
     'PUT': downvoteArticle
+  },
+  '/comments': {
+    'POST': createComment
+  },
+  '/comments/:id': {
+
+  },
+  '/comments/:id/upvote': {
+
+  },
+  '/comments/:id/downvote': {
+
   }
 };
 
@@ -243,6 +255,32 @@ function downvote(item, username) {
 }
 
 // Write all code above this line.
+function createComment(url, request) {
+  const requestComment = request.body && request.body.comment;
+  const response = {};
+
+  if (requestComment && database.users[requestComment.username] && requestComment.url &&
+      requestComment.username) {
+    const comment = {
+      id: database.nextCommentId++,
+      url: requestComment.url,
+      username: requestComment.username,
+      upvotedBy: [],
+      downvotedBy: []
+    };
+
+    database.comment[comment.id] = comment;
+    database.users[comment.username].commentIds.push(comment.id);
+
+    response.body = {comment: comment};
+    response.status = 201;
+  } else {
+    response.status = 400;
+  }
+
+  return response;
+}
+
 
 const http = require('http');
 const url = require('url');
