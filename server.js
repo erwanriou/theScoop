@@ -43,6 +43,39 @@ const routes = {
   }
 };
 
+// the createComment function that is similar to the createArticle funtion.
+function createComment(url, request) {
+  const requestComment = request.body && request.body.comment;
+  const response = {};
+
+  if (requestComment
+  && database.users[requestComment.username]
+  && database.articles[requestComment.articleId]
+  && requestComment.articleId
+  && requestComment.username
+  && requestComment.body) {
+    const comment = {
+      id: database.nextCommentId++,
+      body: requestComment.body,
+      username: requestComment.username,
+      articleId: requestComment.articleId,
+      upvotedBy: [],
+      downvotedBy: []
+    };
+    database.comments[comment.id] = comment;
+    database.users[comment.username].commentIds.push(comment.id);
+    database.articles[comment.articleId].commentIds.push(comment.id);
+
+    response.body = {
+      comment: comment
+    };
+    response.status = 201;
+  } else {
+    response.status = 400;
+  }
+  return response;
+}
+
 function getUser(url, request) {
   const username = url.split('/').filter(segment => segment)[1];
   const user = database.users[username];
@@ -253,34 +286,6 @@ function downvote(item, username) {
   }
   return item;
 }
-
-// Write all code above this line.
-function createComment(url, request) {
-  const requestComment = request.body && request.body.comment;
-  const response = {};
-
-  if (requestComment && database.users[requestComment.username] && requestComment.url &&
-      requestComment.username) {
-    const comment = {
-      id: database.nextCommentId++,
-      url: requestComment.url,
-      username: requestComment.username,
-      upvotedBy: [],
-      downvotedBy: []
-    };
-
-    database.comment[comment.id] = comment;
-    database.users[comment.username].commentIds.push(comment.id);
-
-    response.body = {comment: comment};
-    response.status = 201;
-  } else {
-    response.status = 400;
-  }
-
-  return response;
-}
-
 
 const http = require('http');
 const url = require('url');
